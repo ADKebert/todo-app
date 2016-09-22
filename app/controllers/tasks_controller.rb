@@ -9,11 +9,19 @@ class TasksController < ApplicationController
   end
 
   def update
-    @task.update(task_params)
+    if @task.update(task_params)
+      render json: { status: "success" }
+    else
+      render json: { status: "failed" }
+    end
   end
 
   def destroy
-    @task.destroy
+    if @task.destroy
+      render json: { status: "success" }
+    else
+      render json: { status: "failed" }
+    end
   end
 
   private
