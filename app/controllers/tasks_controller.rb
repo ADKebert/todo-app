@@ -10,7 +10,10 @@ class TasksController < ApplicationController
 
   def update
     if @task.update(task_params)
-      render json: { status: "success" }
+      # Find the standard codes for success/failure
+      # Return the errors on failure
+      # return status: ###
+      render json: @task
     else
       render json: { status: "failed" }
     end

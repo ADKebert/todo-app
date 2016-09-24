@@ -11,9 +11,9 @@ class Scheduler
       if @set_size == 1
         pick_one
       else
-        @tasks.map { |task| TaskSet.new(@tasks.reject{ |t| t == task }, @set_size - 1, @time_block - task[:estimated_duration] - 10).best_of_size }
-              .compact
+        @tasks.map { |task| [task, TaskSet.new(@tasks.reject{ |t| t == task }, @set_size - 1, @time_block - task[:estimated_duration] - 10).best_of_size].reject(&:empty?) }
               .select { |task_group| task_group.size == @set_size }
+              .max_by { |task_group| task_group.sum { |task| task[:estimated_duration] } }
       end
     end
 
@@ -29,12 +29,11 @@ class Scheduler
     one = TaskSet.new(tasks, 1, time_block).best_of_size
     two = TaskSet.new(tasks, 2, time_block).best_of_size
 
-
     sets = []
     unless one.empty?
       sets << [one]
     end
-    unless two.empty?
+    if two
       sets << two
     end
     if sets.empty?

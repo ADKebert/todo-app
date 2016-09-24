@@ -73,4 +73,27 @@ class SchedulerTest < ActiveSupport::TestCase
 
     assert_expected_tasks [short, short2], tasks, time_block_ideal_for_two_short_tasks
   end
+
+  test "selects two tasks that best fill the time block when multiple pairs will fit" do
+    long     = { estimated_duration: 54, created_at: "2016-09-22 10:20:21" }
+    medium   = { estimated_duration: 30, created_at: "2016-09-22 10:20:20" }
+    medium2  = { estimated_duration: 35, created_at: "2016-09-22 11:30:20" }
+    short    = { estimated_duration: 20, created_at: "2016-10-22 11:30:20" }
+    tasks = [long, medium, medium2, short]
+    time_block_ideal_for_a_pair = 70
+
+    # For clarity this test expects a 10 minute buffer between tasks so [medium, medium2] doesn't fit
+    assert_expected_tasks [medium2, short], tasks, time_block_ideal_for_a_pair
+  end
+
+  test "breaks ties for pairs by picking older tasks first" do
+    old_long  = { estimated_duration: 30, created_at: "2016-09-22 10:20:20" }
+    new_long  = { estimated_duration: 30, created_at: "2016-09-23 2:20:20" }
+    old_short = { estimated_duration: 20, created_at: "2016-08-22 10:20:20" }
+    new_short = { estimated_duration: 20, created_at: "2016-10-22 10:20:20" }
+    tasks = [old_long, new_long, old_short, new_short]
+    time_block_to_grab_one_long_one_short = 60
+
+    assert_expected_tasks [old_long, old_short], tasks, time_block_to_grab_one_long_one_short
+  end
 end
