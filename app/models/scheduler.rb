@@ -2,25 +2,30 @@ class Scheduler
   # Helper class for finding best combination of "set_size" elements
   class TaskSet
     def initialize(tasks, set_size, time_block)
-      @tasks      = tasks
-      @set_size   = set_size
-      @time_block = time_block
+      @tasks        = tasks
+      @oldest_tasks = tasks.sort_by { |task| task[:created_at] }
+                           .uniq { |task| task[:estimated_duration] }
+      @set_size     = set_size
+      @time_block   = time_block
     end
 
     def best_of_size
       if @set_size == 1
         pick_one
       else
-        @tasks.map { |task| [task, TaskSet.new(@tasks.reject{ |t| t == task }, @set_size - 1, @time_block - task[:estimated_duration] - 10).best_of_size].reject(&:empty?) }
-              .select { |task_group| task_group.size == @set_size }
-              .max_by { |task_group| task_group.sum { |task| task[:estimated_duration] } }
+        @oldest_tasks.map { |task| [task, TaskSet.new(
+                                     @tasks.reject{ |t| t == task },
+                                     @set_size - 1,
+                                     @time_block - task[:estimated_duration] - 10
+                                     ).best_of_size].reject(&:empty?) }
+                     .select { |task_group| task_group.size == @set_size }
+                     .max_by { |task_group| task_group.sum { |task| task[:estimated_duration] } }
       end
     end
 
     def pick_one
-      one = @tasks.select { |task| task[:estimated_duration] <= @time_block }
-            .sort_by{ |task| task[:created_at] }
-            .max_by { |task| task[:estimated_duration] }
+      one = @oldest_tasks.select { |task| task[:estimated_duration] <= @time_block }
+                         .max_by { |task| task[:estimated_duration] }
       one ? one : []
     end
   end

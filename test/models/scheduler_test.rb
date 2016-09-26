@@ -95,5 +95,18 @@ class SchedulerTest < ActiveSupport::TestCase
     time_block_to_grab_one_long_one_short = 60
 
     assert_expected_tasks [old_long, old_short], tasks, time_block_to_grab_one_long_one_short
+
+    tasks = [new_long, old_long, new_short, old_short]
+    assert_expected_tasks [old_long, old_short], tasks, time_block_to_grab_one_long_one_short
+  end
+
+  test "selects tasks with non unique durations when appropriate" do
+    match1 = { estimated_duration: 30, created_at: "2016-09-22 10:30:20" }
+    match2 = { estimated_duration: 30, created_at: "2016-09-22 10:20:20" }
+    single = { estimated_duration: 50, created_at: "2016-09-22 10:40:20" }
+    tasks = [match2, match1, single]
+    time_block_ideal_for_match1_and_match2 = 70
+
+    assert_expected_tasks [match1, match2], tasks, time_block_ideal_for_match1_and_match2
   end
 end
