@@ -101,8 +101,8 @@ class SchedulerTest < ActiveSupport::TestCase
   end
 
   test "selects tasks with non unique durations when appropriate" do
-    match1 = { estimated_duration: 30, created_at: "2016-09-22 10:30:20" }
-    match2 = { estimated_duration: 30, created_at: "2016-09-22 10:20:20" }
+    match1 = { estimated_duration: 30, created_at: "2016-09-22 10:20:20" }
+    match2 = { estimated_duration: 30, created_at: "2016-09-22 10:30:20" }
     single = { estimated_duration: 50, created_at: "2016-09-22 10:40:20" }
     tasks = [match2, match1, single]
     time_block_ideal_for_match1_and_match2 = 70

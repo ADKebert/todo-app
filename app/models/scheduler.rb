@@ -14,8 +14,7 @@ class Scheduler
       sets
     else
       sets.max_by { |set| set.sum { |task| task[:estimated_duration] } }
-          .sort_by { |task| task[:estimated_duration] }
-          .reverse
+          .sort_by { |task| [-task[:estimated_duration], task[:created_at]] }
     end
   end
 end
