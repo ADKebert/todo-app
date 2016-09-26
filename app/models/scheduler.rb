@@ -1,46 +1,15 @@
 class Scheduler
-  # Helper class for finding best combination of "set_size" elements
-  class TaskSet
-    def initialize(tasks, set_size, time_block)
-      @tasks        = tasks
-      @oldest_tasks = tasks.sort_by { |task| task[:created_at] }
-                           .uniq { |task| task[:estimated_duration] }
-      @set_size     = set_size
-      @time_block   = time_block
-    end
-
-    def best_of_size
-      if @set_size == 1
-        pick_one
-      else
-        @oldest_tasks.map { |task| [task, TaskSet.new(
-                                     @tasks.reject{ |t| t == task },
-                                     @set_size - 1,
-                                     @time_block - task[:estimated_duration] - 10
-                                     ).best_of_size].reject(&:empty?) }
-                     .select { |task_group| task_group.size == @set_size }
-                     .max_by { |task_group| task_group.sum { |task| task[:estimated_duration] } }
-      end
-    end
-
-    def pick_one
-      one = @oldest_tasks.select { |task| task[:estimated_duration] <= @time_block }
-                         .max_by { |task| task[:estimated_duration] }
-      one ? one : []
-    end
-  end
-
   def self.pick_next(tasks, time_block)
-    one = TaskSet.new(tasks, 1, time_block).best_of_size
-    two = TaskSet.new(tasks, 2, time_block).best_of_size
-
+    # one = TaskSet.new(tasks, 1, time_block).best_of_size
+    # two = TaskSet.new(tasks, 2, time_block).best_of_size
+    # three = TaskSet.new(tasks, 3, time_block).best_of_size
     sets = []
-    unless one.empty?
-      sets << [one]
+    (1..tasks.size).each do |task_set_size|
+      new_set = TaskSet.new(tasks, task_set_size, time_block).best_of_size
+      break unless new_set
+      sets << new_set
     end
-    if two
-      sets << two
-    end
+
     if sets.empty?
       sets
     else
@@ -49,15 +18,4 @@ class Scheduler
           .reverse
     end
   end
-
-  private
-  # def self.pick_partner(tasks, task, time_block)
-  #   pick_one(tasks.reject { |t| t == task }, time_block - task[:estimated_duration] - 10)
-  # end
-  #
-  # def self.pick_two(tasks, time_block)
-  #   tasks.map { |task| TaskSet.new(tasks - task, ) }.
-  #         select(&:partner_task).
-  #         max_by { |pair| pair.task[:estimated_duration] + pair.partner_task[:estimated_duration]}
-  # end
 end

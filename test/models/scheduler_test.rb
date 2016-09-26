@@ -109,4 +109,56 @@ class SchedulerTest < ActiveSupport::TestCase
 
     assert_expected_tasks [match1, match2], tasks, time_block_ideal_for_match1_and_match2
   end
+
+  test "selects three tasks when all three fit the time block" do
+    triplet1 = { estimated_duration: 10, created_at: "2016-09-22 10:30:20" }
+    triplet2 = { estimated_duration: 20, created_at: "2016-09-22 10:40:20" }
+    triplet3 = { estimated_duration: 30, created_at: "2016-09-22 10:50:20" }
+    tasks = [triplet1, triplet2, triplet3]
+    time_block_large_enough_for_all_three = 90
+
+    assert_expected_tasks [triplet3, triplet2, triplet1], tasks, time_block_large_enough_for_all_three
+  end
+
+  test "selects best three tasks when multiple triplets fit the time block" do
+    triplet1 = { estimated_duration: 13, created_at: "2016-09-22 10:30:20" }
+    triplet2 = { estimated_duration: 14, created_at: "2016-09-22 10:40:20" }
+    triplet3 = { estimated_duration: 15, created_at: "2016-09-22 10:50:20" }
+    triplet4 = { estimated_duration: 16, created_at: "2016-09-22 10:20:20" }
+    triplet5 = { estimated_duration: 17, created_at: "2016-09-22 10:10:20" }
+    triplet6 = { estimated_duration: 18, created_at: "2016-09-22 10:15:20" }
+    tasks = [triplet1, triplet2, triplet3, triplet4, triplet5, triplet6]
+    time_block_large_enough_for_many_triplets = 70
+
+    assert_expected_tasks [triplet6, triplet5, triplet3], tasks, time_block_large_enough_for_many_triplets
+
+    time_block_large_enough_for_many_triplets = 71
+    assert_expected_tasks [triplet6, triplet5, triplet4], tasks, time_block_large_enough_for_many_triplets
+  end
+
+  test "selects an arbitrary number of tasks based on the time block" do
+    small1     = { estimated_duration: 10, created_at: "2016-09-22 10:30:20" }
+    small2     = { estimated_duration: 13, created_at: "2016-09-22 10:30:23" }
+    small3     = { estimated_duration: 12, created_at: "2016-09-22 10:30:25" }
+    small4     = { estimated_duration: 11, created_at: "2016-09-22 10:30:27" }
+    small5     = { estimated_duration: 15, created_at: "2016-09-22 10:30:29" }
+    really_big = { estimated_duration: 70, created_at: "2016-09-22 10:30:20" }
+    tasks = [small1, small2, small3, small4, small5, really_big]
+
+    time_block_for_one_small_task = 20
+    assert_expected_tasks [small5], tasks, time_block_for_one_small_task
+
+    time_block_for_three_small_tasks = 65
+    assert_expected_tasks [small5, small2, small3], tasks, time_block_for_three_small_tasks
+
+    time_block_for_one_really_big_task = 70
+    assert_expected_tasks [really_big], tasks, time_block_for_one_really_big_task
+
+    time_block_for_one_big_and_one_small_task = 93
+    assert_expected_tasks [really_big, small2], tasks, time_block_for_one_big_and_one_small_task
+
+    only_small_tasks = [small1, small2, small3, small4, small5]
+    time_block_for_all_five_small_tasks = 101
+    assert_expected_tasks [small5, small2, small3, small4, small1], only_small_tasks, time_block_for_all_five_small_tasks
+  end
 end
