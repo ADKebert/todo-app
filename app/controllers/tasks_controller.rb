@@ -4,6 +4,11 @@ class TasksController < ApplicationController
     render json: User.find(params[:user_id]).tasks
   end
 
+  def scheduled
+    tasks = User.find(params[:user_id]).tasks
+    render json: Scheduler.pick_next(tasks, params[:time_block].to_i)
+  end
+
   def create
     render json: Task.create(task_params)
   end

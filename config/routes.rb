@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'tasks/scheduled' => 'tasks#scheduled'
+
   resources :tasks, only: [:index, :create, :update, :destroy]
   resources :users, only: [:create]
 
