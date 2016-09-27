@@ -222,4 +222,22 @@ class SchedulerTest < ActiveSupport::TestCase
     time_block_that_fits_all_three = 70
     assert_expected_tasks [dl_task1, dl_task2, no_dl_task], tasks, time_block_that_fits_all_three
   end
+
+  test "works correctly for a large mix of deadline and no deadline tasks" do
+    dl1_short = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: "2016-17-22 10:30:20" }
+    dl1_long = { estimated_duration: 50, created_at: "2016-09-22 10:30:20", deadline: "2016-17-22 10:30:20" }
+    dl2_short = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: "2016-19-25 10:30:20" }
+    dl2_long = { estimated_duration: 50, created_at: "2016-09-22 10:30:20", deadline: "2016-19-25 10:30:20" }
+    dl3_first = { estimated_duration: 30, created_at: "2016-07-20 10:30:20", deadline: "2016-20-25 8:30:20" }
+    dl3_second = { estimated_duration: 30, created_at: "2016-09-20 10:30:20", deadline: "2016-20-25 8:30:20" }
+    no_dl_short = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: nil }
+    no_dl_long = { estimated_duration: 50, created_at: "2016-09-22 10:30:20", deadline: nil }
+    tasks = [dl1_short, dl1_long, dl2_short, dl2_long, dl3_first, dl3_second, no_dl_short, no_dl_long]
+
+    time_block_for_one_long_and_two_shorts = 90
+    assert_expected_tasks [dl1_long, dl1_short, dl2_short], tasks, time_block_for_one_long_and_two_shorts
+
+    time_block_for_all_the_things = 320
+    assert_expected_tasks [dl1_long, dl1_short, dl2_long, dl2_short, dl3_first, dl3_second, no_dl_long, no_dl_short], tasks, time_block_for_all_the_things
+  end
 end
