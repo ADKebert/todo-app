@@ -172,15 +172,54 @@ class SchedulerTest < ActiveSupport::TestCase
     assert_expected_tasks [dl_task], tasks, time_block_that_should_favor_no_dl_task_if_deadline_not_considered
   end
 
-  # tasks with deadlines should be prioritized by earliest deadline
-  # small1 = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: "2016-16-22 10:30:20" }
-  # small2 = { estimated_duration: 13, created_at: "2016-09-22 10:30:23", deadline: "2016-16-22 10:30:20" }
-  # small3 = { estimated_duration: 12, created_at: "2016-09-22 10:30:25", deadline: "2016-16-22 10:40:20" }
-  # small4 = { estimated_duration: 11, created_at: "2016-09-22 10:30:27", deadline: "2016-16-22 10:40:20" }
-  # small5 = { estimated_duration: 15, created_at: "2016-09-22 10:30:29", deadline: "2016-17-22 10:30:20" }
-  # tasks  = [small1, small2, small3, small4, small5]
+  test "tasks with deadlines should be prioritized by earliest deadline" do
+    earliest = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: "2016-16-22 10:30:20" }
+    small2 = { estimated_duration: 13, created_at: "2016-09-22 10:30:23", deadline: "2016-16-22 10:30:21" }
+    small3 = { estimated_duration: 12, created_at: "2016-09-22 10:30:25", deadline: "2016-16-22 10:40:20" }
+    small4 = { estimated_duration: 11, created_at: "2016-09-22 10:30:27", deadline: "2016-16-22 10:40:20" }
+    small5 = { estimated_duration: 15, created_at: "2016-09-22 10:30:29", deadline: "2016-17-22 10:30:20" }
+    tasks  = [earliest, small2, small3, small4, small5]
 
-  # tasks with the same deadline should follow similar rules to tasks without deadlines
+    time_block_that_could_fit_any_one_task = 20
+    assert_expected_tasks [earliest], tasks, time_block_that_could_fit_any_one_task
+  end
 
-  # tasks should be matched to a deadline task first from tasks with deadlines and second from tasks without deadlines
+  test "tasks with the same deadline should follow similar rules to tasks without deadlines" do
+    dl_small1     = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: "2016-17-22 10:30:20" }
+    dl_small2     = { estimated_duration: 13, created_at: "2016-09-22 10:30:23", deadline: "2016-17-22 10:30:20" }
+    dl_small3     = { estimated_duration: 12, created_at: "2016-09-22 10:30:25", deadline: "2016-17-22 10:30:20" }
+    dl_small4     = { estimated_duration: 11, created_at: "2016-09-22 10:30:27", deadline: "2016-17-22 10:30:20" }
+    dl_small5     = { estimated_duration: 15, created_at: "2016-09-22 10:30:29", deadline: "2016-17-22 10:30:20" }
+    dl_really_big = { estimated_duration: 70, created_at: "2016-09-22 10:30:20", deadline: "2016-17-22 10:30:20" }
+    tasks = [dl_small1, dl_small2, dl_small3, dl_small4, dl_small5, dl_really_big]
+
+    time_block_for_one_small_task = 20
+    assert_expected_tasks [dl_small5], tasks, time_block_for_one_small_task
+
+    time_block_for_three_small_tasks = 65
+    assert_expected_tasks [dl_small5, dl_small2, dl_small3], tasks, time_block_for_three_small_tasks
+
+    time_block_for_one_really_big_task = 70
+    assert_expected_tasks [dl_really_big], tasks, time_block_for_one_really_big_task
+
+    time_block_for_one_big_and_one_small_task = 93
+    assert_expected_tasks [dl_really_big, dl_small2], tasks, time_block_for_one_big_and_one_small_task
+
+    only_small_tasks = [dl_small1, dl_small2, dl_small3, dl_small4, dl_small5]
+    time_block_for_all_five_small_tasks = 101
+    assert_expected_tasks [dl_small5, dl_small2, dl_small3, dl_small4, dl_small1], only_small_tasks, time_block_for_all_five_small_tasks
+  end
+
+  test "tasks should be matched to a deadline task first from tasks with deadlines and second from tasks without deadlines" do
+    dl_task1 = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: "2016-17-22 10:30:20" }
+    dl_task2 = { estimated_duration: 15, created_at: "2016-09-22 10:30:20", deadline: "2016-17-22 10:30:25" }
+    no_dl_task = { estimated_duration: 20, created_at: "2016-09-22 10:30:20", deadline: nil }
+    tasks = [dl_task1, dl_task2, no_dl_task]
+
+    time_block_that_fits_any_two = 45
+    assert_expected_tasks [dl_task1, dl_task2], tasks, time_block_that_fits_any_two
+
+    time_block_that_fits_all_three = 70
+    assert_expected_tasks [dl_task1, dl_task2, no_dl_task], tasks, time_block_that_fits_all_three
+  end
 end
