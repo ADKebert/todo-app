@@ -1,5 +1,5 @@
 #Welcome to StreamLine's api
-This is a rails api application that is part of the StreamLine to-do list application.  It main functionality is that users can store a list of tasks with time estimates for completing the tasks and with optional deadlines.  The application can schedule those tasks based on what fits into a given block of time.  View it live at [heroku](https://sleepy-mountain-24094.herokuapp.com/)
+This is a rails api application that is part of the StreamLine to-do list application.  Its main functionality is that users can store a list of tasks with time estimates for completing the tasks and with optional deadlines.  The application can schedule those tasks based on what fits into a given block of time.  View it live at [heroku](https://sleepy-mountain-24094.herokuapp.com/)
 
 ## The rules the scheduler follows are:
 1. Tasks with earlier deadlines are highest priority.
