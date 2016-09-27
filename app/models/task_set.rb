@@ -1,18 +1,20 @@
 class TaskSet
-  attr_reader :tasks, :oldest_tasks, :set_size, :time_block
+  attr_reader :tasks, :oldest_tasks, :set_size, :time_block, :buffer
 
-  def initialize(tasks, set_size, time_block)
+  def initialize(tasks, set_size, time_block, buffer)
     @tasks        = tasks
     @oldest_tasks = tasks.sort_by { |task| task[:created_at] }
                          .uniq { |task| task[:estimated_duration] }
     @set_size     = set_size
     @time_block   = time_block
+    @buffer       = buffer
   end
 
   def find_partner_task_subset(task)
     [TaskSet.new(tasks.reject{ |t| t == task },
                  set_size - 1,
-                 time_block - task[:estimated_duration] - 10).best_of_size].compact
+                 time_block - task[:estimated_duration] - buffer,
+                 buffer).best_of_size].compact
   end
 
   def best_of_size

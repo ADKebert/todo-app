@@ -1,12 +1,8 @@
 require 'test_helper'
 
 class SchedulerTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
-
   def assert_expected_tasks(expected_tasks, tasks, time_block)
-    assert_equal(expected_tasks, Scheduler.pick_next(tasks, time_block))
+    assert_equal(expected_tasks, Scheduler.pick_next(tasks, time_block, 10))
   end
 
   # Testing selection of single tasks with no deadline
