@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class SchedulerTest < ActiveSupport::TestCase
+  # Helper method to dry up test code, uses buffer of 10 between tasks
   def assert_expected_tasks(expected_tasks, tasks, time_block)
     assert_equal(expected_tasks, Scheduler.pick_next(tasks, time_block, 10))
   end
