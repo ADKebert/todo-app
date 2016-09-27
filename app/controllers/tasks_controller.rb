@@ -6,7 +6,8 @@ class TasksController < ApplicationController
 
   def scheduled
     tasks = User.find(params[:user_id]).tasks
-    render json: Scheduler.pick_next(tasks, params[:time_block].to_i)
+    # Currently using default buffer of 10 between tasks
+    render json: Scheduler.pick_next(tasks, params[:time_block].to_i, 10)
   end
 
   def create
