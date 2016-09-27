@@ -161,4 +161,26 @@ class SchedulerTest < ActiveSupport::TestCase
     time_block_for_all_five_small_tasks = 101
     assert_expected_tasks [small5, small2, small3, small4, small1], only_small_tasks, time_block_for_all_five_small_tasks
   end
+
+  # Testing tasks with deadlines
+  test "tasks with deadlines should be chosen before tasks without" do
+    dl_task = { estimated_duration: 30, created_at: "2016-09-22 10:30:29", deadline: "2016-10-22 10:30:29" }
+    no_dl_task = { estimated_duration: 35, created_at: "2016-09-22 10:30:29", deadline: nil }
+    tasks = [dl_task, no_dl_task]
+
+    time_block_that_should_favor_no_dl_task_if_deadline_not_considered = 40
+    assert_expected_tasks [dl_task], tasks, time_block_that_should_favor_no_dl_task_if_deadline_not_considered
+  end
+
+  # tasks with deadlines should be prioritized by earliest deadline
+  # small1 = { estimated_duration: 10, created_at: "2016-09-22 10:30:20", deadline: "2016-16-22 10:30:20" }
+  # small2 = { estimated_duration: 13, created_at: "2016-09-22 10:30:23", deadline: "2016-16-22 10:30:20" }
+  # small3 = { estimated_duration: 12, created_at: "2016-09-22 10:30:25", deadline: "2016-16-22 10:40:20" }
+  # small4 = { estimated_duration: 11, created_at: "2016-09-22 10:30:27", deadline: "2016-16-22 10:40:20" }
+  # small5 = { estimated_duration: 15, created_at: "2016-09-22 10:30:29", deadline: "2016-17-22 10:30:20" }
+  # tasks  = [small1, small2, small3, small4, small5]
+
+  # tasks with the same deadline should follow similar rules to tasks without deadlines
+
+  # tasks should be matched to a deadline task first from tasks with deadlines and second from tasks without deadlines
 end
