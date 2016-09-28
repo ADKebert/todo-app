@@ -1,8 +1,10 @@
 Rails.application.routes.draw do
   get 'tasks/scheduled' => 'tasks#scheduled'
 
+  # Routes for oauth2 through google
+  get '/oauth2authorize' => 'authentication#oauth2authorize'
+  get '/oauth2callback'  => 'authentication#oauth2callback'
+
   resources :tasks, only: [:index, :create, :update, :destroy]
   resources :users, only: [:create]
-
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
