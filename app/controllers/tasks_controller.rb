@@ -54,10 +54,11 @@ class TasksController < ApplicationController
   end
 
   def current_user
-    if decoded_token.empty?
+    token = decoded_token
+    if token.empty?
       false
     else
-      @user = User.find_by(decoded_token[:google_id])
+      @user = User.find_by(token[:google_id])
     end
   end
 
