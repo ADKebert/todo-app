@@ -23,7 +23,6 @@ class AuthenticationController < ApplicationController
     token = JWT.encode(payload, Rails.application.secrets.secret_key_base, 'HS256')
 
     # Change this url to where Brett would like to capture the token
-    # redirect_to "http://localhost:3000/settings?token=#{URI.escape(token)}"
     redirect_to "http://localhost:3000/?token=#{URI.escape(token)}"
   end
 
