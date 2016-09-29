@@ -1,21 +1,36 @@
 class TasksController < ApplicationController
   before_action :set_task, only: [:update, :destroy]
+  before_action :current_user
   def index
-    render json: User.find(params[:user_id]).tasks
+    if @user
+      render json: @user.tasks
+    else
+      render json: []
+    end
   end
 
   def scheduled
-    tasks = User.find(params[:user_id]).tasks
-    # Currently using default buffer of 10 between tasks
-    render json: Scheduler.pick_next(tasks, params[:time_block].to_i, 10)
+    if @user
+      tasks = @user.tasks
+      # Currently using default buffer of 10 between tasks
+      render json: Scheduler.pick_next(tasks, params[:time_block].to_i, 10)
+    else
+      render json: []
+    end
   end
 
   def create
-    render json: Task.create(task_params)
+    if @user
+      task = Task.create(task_params)
+      task.user = @user
+      render json: task
+    else
+      render json: []
+    end
   end
 
   def update
-    if @task.update(task_params)
+    if @user == @task.user && @task.update(task_params)
       # Find the standard codes for success/failure
       # Return the errors on failure
       # return status: ###
@@ -26,7 +41,7 @@ class TasksController < ApplicationController
   end
 
   def destroy
-    if @task.destroy
+    if @user == @task.user && @task.destroy
       render json: { status: "success" }
     else
       render json: { status: "failed" }
@@ -38,7 +53,16 @@ class TasksController < ApplicationController
     @task = Task.find(params[:id])
   end
 
+  def current_user
+    token = decoded_token
+    if token.empty?
+      false
+    else
+      @user = User.find_by(token[:google_id])
+    end
+  end
+
   def task_params
-    params.permit(:title, :description, :estimated_duration, :deadline, :time_sensitive, :start_time, :end_time, :user_id)
+    params.permit(:title, :description, :estimated_duration, :deadline, :time_sensitive, :start_time, :end_time)
   end
 end
