@@ -25,7 +25,7 @@ class TasksController < ApplicationController
       task.user = @user
       render json: task
     else
-      render json: []
+      render json: { status: "no user" }
     end
   end
 
