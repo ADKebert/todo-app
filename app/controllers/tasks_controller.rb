@@ -21,8 +21,7 @@ class TasksController < ApplicationController
 
   def create
     if @user
-      task = Task.create(task_params)
-      task.user = @user
+      task = @user.tasks.create(task_params)
       render json: task
     else
       render json: { status: "no user" }
