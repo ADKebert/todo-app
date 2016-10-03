@@ -57,7 +57,7 @@ class TasksController < ApplicationController
     if token.empty?
       false
     else
-      @user = User.find_by(token[:google_id])
+      @user = User.find_by(google_id: token["google_id"])
     end
   end
 
