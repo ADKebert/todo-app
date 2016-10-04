@@ -23,12 +23,12 @@ class AuthenticationController < ApplicationController
     token = JWT.encode(payload, Rails.application.secrets.secret_key_base, 'HS256')
 
     # Change this url to where Brett would like to capture the token
-
-    if request.local?
-      redirect_to "http://localhost:3000/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
-    else
-      redirect_to "http://cuddly-guitar.surge.sh/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
-    end
+    redirect_to "http://localhost:3000/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
+    # if request.local?
+    #   redirect_to "http://localhost:3000/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
+    # else
+    #   redirect_to "http://cuddly-guitar.surge.sh/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
+    # end
   end
 
   def root
