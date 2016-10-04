@@ -23,8 +23,10 @@ class AuthenticationController < ApplicationController
     token = JWT.encode(payload, Rails.application.secrets.secret_key_base, 'HS256')
 
     # Change this url to where Brett would like to capture the token
-    redirect_to request.host.include?("surge") ? "http://cuddly-guitar.surge.sh/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
-                                               : "http://localhost:3000/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
+    requesting_host = request.host
+    requesting_port = request.port
+
+    redirect_to "http://#{requesting_host}:#{requesting_port}/?user_name=#{user_info[:display_name]}&token=#{URI.escape(token)}"
   end
 
   def root
